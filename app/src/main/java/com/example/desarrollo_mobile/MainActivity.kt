@@ -5,25 +5,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.desarrollo_mobile.navigation.WimNavGraph
+import com.example.desarrollo_mobile.ui.theme.Desarrollo_mobileTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MaterialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    val navController = rememberNavController()
-                    WimNavGraph(navController = navController)
-                }
+            Desarrollo_mobileTheme {
+                val navController = rememberNavController()
+                WimNavGraph(navController = navController, modifier = Modifier.fillMaxSize())
             }
         }
     }
