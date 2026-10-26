@@ -1,46 +1,51 @@
 package com.example.desarrollo_mobile.ui.theme
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
-// 1. Declaración previa de las variables de contenedor de color
-private val ColorContainerPrimary = Color(0xFF382B61)
-private val ColorContainerSecondary = Color(0xFF173D49)
-
-// 2. Esquema de colores utilizando las variables ya inicializadas
-private val WimColorScheme = darkColorScheme(
+private val WimPastelColorScheme = lightColorScheme(
     primary = WimPrimary,
-    onPrimary = WimBackground,
-    primaryContainer = ColorContainerPrimary,
-    onPrimaryContainer = WimText,
-    secondary = WimCyan,
-    onSecondary = WimBackground,
-    secondaryContainer = ColorContainerSecondary,
-    onSecondaryContainer = WimText,
-    tertiary = WimSuccess,
+    onPrimary = Color.White,
+    primaryContainer = WimPrimaryLight,
+    onPrimaryContainer = Color(0xFF70283C),
+
+    secondary = WimSecondary,
+    onSecondary = Color.White,
+    secondaryContainer = WimSecondaryLight,
+    onSecondaryContainer = Color(0xFF4A148C),
+
+    tertiary = WimTertiary,
+    onTertiary = Color(0xFF5D2D23),
+    tertiaryContainer = WimTertiaryLight,
+    onTertiaryContainer = Color(0xFF6E3930),
+
     background = WimBackground,
     onBackground = WimText,
+
     surface = WimSurface,
     onSurface = WimText,
-    surfaceVariant = WimSurfaceElevated,
+    surfaceVariant = WimSurfaceVariant,
     onSurfaceVariant = WimMuted,
+
     outline = WimOutline,
+    outlineVariant = Color(0xFFF9E4EB),
+
     error = WimDanger,
-    onError = WimBackground,
-    errorContainer = Color(0xFF482536),
-    onErrorContainer = WimText
+    onError = Color.White,
+    errorContainer = WimDangerLight,
+    onErrorContainer = Color(0xFF7A2020)
 )
 
 @Composable
 fun Desarrollo_mobileTheme(
-    darkTheme: Boolean = true,
+    darkTheme: Boolean = false,
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = WimColorScheme,
+        colorScheme = WimPastelColorScheme,
         typography = Typography,
         content = content
     )
