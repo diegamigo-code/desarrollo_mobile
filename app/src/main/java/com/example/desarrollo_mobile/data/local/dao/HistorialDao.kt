@@ -2,6 +2,7 @@ package com.example.desarrollo_mobile.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.desarrollo_mobile.model.RegistroHistorial
 import kotlinx.coroutines.flow.Flow
@@ -11,6 +12,9 @@ interface HistorialDao {
 
     @Insert
     suspend fun insertar(registro: RegistroHistorial)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarLote(registros: List<RegistroHistorial>)
 
     @Query("SELECT * FROM historial ORDER BY fecha DESC")
     fun obtenerTodo(): Flow<List<RegistroHistorial>>

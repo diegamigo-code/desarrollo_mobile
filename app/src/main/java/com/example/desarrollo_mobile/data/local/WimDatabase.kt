@@ -17,6 +17,7 @@ import com.example.desarrollo_mobile.model.PuntajeCriterio
 import com.example.desarrollo_mobile.model.RegistroHistorial
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @Database(
@@ -61,8 +62,29 @@ abstract class WimDatabase : RoomDatabase() {
                 super.onCreate(db)
                 INSTANCE?.let { database ->
                     CoroutineScope(Dispatchers.IO).launch {
-                        database.criterioDao().insertarLote(DatosSemilla.CRITERIOS_INICIALES)
+                        poblarDatosIniciales(database)
                     }
+                }
+            }
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                super.onOpen(db)
+                INSTANCE?.let { database ->
+                    CoroutineScope(Dispatchers.IO).launch {
+                        poblarDatosIniciales(database)
+                    }
+                }
+            }
+
+            private suspend fun poblarDatosIniciales(database: WimDatabase) {
+                if (database.criterioDao().obtenerCriterios().first().isEmpty()) {
+                    database.criterioDao().insertarLote(DatosSemilla.CRITERIOS_INICIALES)
+                }
+                if (database.candidataDao().contar() == 0) {
+                    database.candidataDao().insertarLote(DatosSemilla.CANDIDATAS_INICIALES)
+                    database.evaluacionDao().insertarEvaluacionesLote(DatosSemilla.EVALUACIONES_INICIALES)
+                    database.evaluacionDao().insertarPuntajesLote(DatosSemilla.PUNTAJES_INICIALES)
+                    database.historialDao().insertarLote(DatosSemilla.HISTORIAL_INICIAL)
                 }
             }
         }

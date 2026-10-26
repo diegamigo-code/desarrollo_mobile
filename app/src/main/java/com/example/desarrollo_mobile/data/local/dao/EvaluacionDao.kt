@@ -16,8 +16,14 @@ interface EvaluacionDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertarEvaluacion(evaluacion: Evaluacion): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarEvaluacionesLote(evaluaciones: List<Evaluacion>)
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertarPuntajes(puntajes: List<PuntajeCriterio>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarPuntajesLote(puntajes: List<PuntajeCriterio>)
 
     @Query("SELECT COUNT(*) FROM evaluaciones WHERE candidataId = :candidataId AND evaluadoraClave = :evaluadoraClave")
     suspend fun contarPorEvaluadoraYCandidata(candidataId: Long, evaluadoraClave: String): Int

@@ -20,6 +20,9 @@ interface CandidataDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertar(candidata: Candidata): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertarLote(candidatas: List<Candidata>)
+
     @Query("UPDATE candidatas SET estado = :nuevoEstado WHERE id = :id")
     suspend fun actualizarEstado(id: Long, nuevoEstado: EstadoCandidatura)
 
