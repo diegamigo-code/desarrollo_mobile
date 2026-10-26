@@ -31,6 +31,13 @@ fun WimNavGraph(
 ) {
     val sesionState by sesionViewModel.uiState.collectAsState()
 
+    val onCerrarSesionLambda = {
+        sesionViewModel.cerrarSesion()
+        navController.navigate(Screen.Login.route) {
+            popUpTo(0) { inclusive = true }
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Screen.Login.route,
@@ -63,7 +70,8 @@ fun WimNavGraph(
                 },
                 onCandidataClick = { candidataId ->
                     navController.navigate(Screen.EvaluarCandidata.crearRuta(candidataId))
-                }
+                },
+                onCerrarSesionClick = onCerrarSesionLambda
             )
         }
 
@@ -101,7 +109,8 @@ fun WimNavGraph(
 
         composable(Screen.RankingConsolidado.route) {
             RankingScreen(
-                viewModel = candidatasViewModel
+                viewModel = candidatasViewModel,
+                onCerrarSesionClick = onCerrarSesionLambda
             )
         }
     }

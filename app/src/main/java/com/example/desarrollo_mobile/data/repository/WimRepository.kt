@@ -13,6 +13,7 @@ import com.example.desarrollo_mobile.model.Evaluacion
 import com.example.desarrollo_mobile.model.PuntajeCriterio
 import com.example.desarrollo_mobile.model.RegistroHistorial
 import com.example.desarrollo_mobile.model.ResultadoConsolidado
+import java.util.Locale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -156,7 +157,7 @@ class WimRepository(
                     usuarioNombre = evaluadoraNombre,
                     usuarioRol = "Evaluadora",
                     accion = RegistroHistorial.Acciones.EVALUACION_CREADA,
-                    detalle = "Evaluación registrada con nota ${String.format("%.1f", puntajeTotal)}/100"
+                    detalle = "Evaluación registrada con nota ${String.format(Locale.getDefault(), "%.1f", puntajeTotal)}/100"
                 )
             )
 

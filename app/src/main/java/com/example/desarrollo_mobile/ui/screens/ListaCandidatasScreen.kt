@@ -43,7 +43,8 @@ fun ListaCandidatasScreen(
     rolActual: Rol,
     onNuevaCandidataClick: () -> Unit,
     onCandidataClick: (Long) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onCerrarSesionClick: (() -> Unit)? = null
 ) {
     val candidatas by viewModel.candidatasFiltradas.collectAsState()
     val query by viewModel.busquedaQuery.collectAsState()
@@ -65,7 +66,8 @@ fun ListaCandidatasScreen(
         ) {
             WimTopBar(
                 title = "Candidatas",
-                subtitle = "Panel de talento · ${rolActual.etiqueta}"
+                subtitle = "Panel de talento · ${rolActual.etiqueta}",
+                onCerrarSesionClick = onCerrarSesionClick
             )
             Column(modifier = Modifier.fillMaxSize().padding(horizontal = 18.dp)) {
                 Row(
@@ -75,7 +77,7 @@ fun ListaCandidatasScreen(
                     WimCard(modifier = Modifier.weight(1f)) {
                         Text("REGISTROS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         Spacer(Modifier.height(6.dp))
-                        Text("${candidatas.size}", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        Text(candidatas.size.toString(), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                     }
                     WimCard(modifier = Modifier.weight(1f)) {
                         Text("PLATAFORMA", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
