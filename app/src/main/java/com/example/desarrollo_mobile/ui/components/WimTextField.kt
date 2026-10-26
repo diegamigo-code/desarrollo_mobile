@@ -1,4 +1,4 @@
-qpackage com.example.desarrollo_mobile.ui.components
+package com.example.desarrollo_mobile.ui.components
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
