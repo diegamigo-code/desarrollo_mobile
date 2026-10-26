@@ -11,6 +11,14 @@ La plataforma permite a las evaluadoras registrar postulantes, aplicar matrices 
 
 ---
 
+## 📋 Tablero de Gestión del Proyecto (Trello)
+
+El seguimiento de tareas, *backlog*, historias de usuario y avance del proyecto se gestionó a través del siguiente tablero en **Trello**:
+
+🔗 **[Ver Tablero Trello del Proyecto](https://trello.com)** *(Reemplazar con el enlace público de tu tablero)*
+
+---
+
 ## 💡 ¿Qué problema resuelve?
 
 Tradicionalmente, los procesos de selección técnica sufren de sesgos, falta de estandarización en las notas y pérdida de trazabilidad. **WIM 100** resuelve este desafío mediante:

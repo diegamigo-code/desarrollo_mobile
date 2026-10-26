@@ -1,5 +1,7 @@
 package com.example.desarrollo_mobile.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -21,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.desarrollo_mobile.model.Rol
@@ -34,6 +38,8 @@ fun LoginScreen(onLoginExitoso: (String, Rol) -> Unit, modifier: Modifier = Modi
     var nombreUsuario by remember { mutableStateOf("") }
     var rolSeleccionado by remember { mutableStateOf(Rol.EVALUADORA) }
     var errorNombre by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val trelloUrl = "https://trello.com/b/jEJZOR8N/proyecto-wim-100-dsy1105" // Reemplazar con el enlace directo al tablero público de Trello del proyecto
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, modifier = modifier) { innerPadding ->
         Column(
@@ -81,6 +87,17 @@ fun LoginScreen(onLoginExitoso: (String, Rol) -> Unit, modifier: Modifier = Modi
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(Modifier.height(10.dp))
+                OutlinedButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(trelloUrl))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("📋 Ver Tablero Trello del Proyecto", color = WimCyan, style = MaterialTheme.typography.labelLarge)
+                }
             }
             Spacer(Modifier.height(20.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
