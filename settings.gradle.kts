@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AppSemestral"
+rootProject.name = "desarrollo_mobile"
 include(":app")

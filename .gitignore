@@ -14,9 +14,7 @@
 .cxx
 local.properties
 
-# Kotlin / caches locales
-/.kotlin
-/.idea/.name
+.kotlin/
+.env
 
-# Respaldo local de la versión anterior de la app (no versionar)
 _respaldo_app_anterior/
