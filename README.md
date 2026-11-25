@@ -1,176 +1,117 @@
-# 🏆 WIM 100 — Sistema de Gestión y Evaluación de Candidatas
+# WIM 100 · Postulación y evaluación (MVP Android)
 
-[![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com/)
-[![Kotlin](https://img.shields.io/badge/Language-Kotlin%202.0-purple.svg)](https://kotlinlang.org/)
-[![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-blue.svg)](https://developer.android.com/jetpack/compose)
-[![Room](https://img.shields.io/badge/Database-Room%202.6.1-orange.svg)](https://developer.android.com/training/data-storage/room)
+Aplicación Android en **Kotlin + Jetpack Compose (Material Design 3)** que digitaliza el flujo de
+postulación y evaluación del programa **WIM 100 – DYM Cyber**. Proyecto de la asignatura
+**DSY1105 Desarrollo de Aplicaciones Móviles** (Duoc UC), Evaluación Parcial 2.
 
-**WIM 100** es una aplicación nativa para Android desarrollada con **Kotlin** y **Jetpack Compose**. Diseñada para digitalizar, estandarizar y profesionalizar el proceso de selección de talentos femeninos en las áreas de Tecnología, Ciberseguridad e Ingeniería dentro de la iniciativa **WIM (Women in Mining / Women in Tech)**.
+> ⚠️ MVP académico. Todos los datos son **ficticios/sintéticos**. No se integra la API real de LinkedIn
+> y la matriz de evaluación es **provisional**, sujeta a validación del Socio Formador.
 
-La plataforma permite a las evaluadoras registrar postulantes, aplicar matrices de evaluación técnica ponderadas y generar reportes consolidados en tiempo real para el equipo directivo, asegurando un proceso transparente, objetivo y trazable.
+## Integrantes
 
----
+| Nombre | Usuario GitHub | Responsabilidades principales |
+|---|---|---|
+| _Nombre Apellido 1_ | _@usuario1_ | _completar_ |
+| _Nombre Apellido 2_ | _@usuario2_ | _completar_ |
 
-## 📋 Tablero de Gestión del Proyecto (Trello)
+Tablero Trello: _enlace_
 
-El seguimiento de tareas, *backlog*, historias de usuario y avance del proyecto se gestionó a través del siguiente tablero en **Trello**:
+## Funcionalidades
 
-🔗 **[Ver Tablero Trello del Proyecto](https://trello.com)** *(Reemplazar con el enlace público de tu tablero)*
+| Requisito del caso | Implementación |
+|---|---|
+| Registrar / consultar candidaturas | Formulario validado + lista con búsqueda y filtro por estado |
+| Revisar antecedentes | CV en PDF (visor integrado), experiencia y enlace ficticio a perfil profesional |
+| Matriz de criterios | 5 criterios ponderados (pesos suman 100 %), puntaje 1–5, total 0–100 en vivo |
+| Puntajes, observaciones y evaluadora | Observación por criterio (obligatoria si el puntaje es ≤ 2) + observación general; se guarda el nombre de la evaluadora |
+| Evitar evaluaciones duplicadas | Verificación en el Repository **y** índice único `(candidataId, evaluadoraClave)` en Room |
+| Trazabilidad | Tabla `historial`: inicio/cierre de sesión, registro, evaluación, intento duplicado, resolución, consulta de CV/perfil, compartir |
+| Estado y resultados consolidados | Estados Postulada → En evaluación → Evaluada (≥ 2 evaluaciones) → Seleccionada / No seleccionada; ranking por promedio |
+| Perfiles | **Evaluadora** (registra y evalúa) y **Dirección** (consulta y resuelve) |
 
----
+## Requisitos técnicos (rúbrica) → dónde está en el código
 
-## 💡 ¿Qué problema resuelve?
+| Requisito | Archivos |
+|---|---|
+| Interfaz M3 y navegación | `ui/theme/*`, `navigation/WimNavHost.kt`, `ui/WimApp.kt` (barra inferior) |
+| Formularios con ícono y error visual | `ui/components/CampoValidado.kt`, `ui/screens/CandidataFormScreen.kt`, `EvaluacionScreen.kt` |
+| Validación fuera de los composables | `validation/CandidataValidator.kt`, `validation/EvaluacionValidator.kt`, ViewModels |
+| Animaciones | Transiciones del NavHost, `sacudir()` en botones con error, selector de puntaje con rebote (spring), `PuntajeCircular` animado, `animateItem()` en listas, tarjetas expandibles (`animateContentSize`), escudo con pulso infinito, barras de ranking que crecen |
+| MVVM | `model/` · `data/local/` (Room) · `data/repository/` · `ui/viewmodel/` · `ui/screens/` + `ui/components/` |
+| Persistencia Room | `data/local/WimDatabase.kt`, `data/local/dao/*`, `data/local/DatosSemilla.kt` |
+| Recursos nativos (4) | `nativo/` → ver tabla siguiente |
 
-Tradicionalmente, los procesos de selección técnica sufren de sesgos, falta de estandarización en las notas y pérdida de trazabilidad. **WIM 100** resuelve este desafío mediante:
+### Recursos nativos y permisos
 
-- **Matriz de evaluación ponderada**: Criterios predefinidos con porcentajes asignados.
-- **Validaciones en tiempo real**: Formatos de contacto, dominios corporativos autorizados y longitud de resúmenes.
-- **Control de duplicados**: Previene que una evaluadora califique varias veces a la misma candidata o que se dupliquen registros.
-- **Auditoría continua**: Registro histórico de cada acción realizada dentro de la app (inicios de sesión, registros, evaluaciones y cambios de estado).
+| Recurso | Permiso | Gestión |
+|---|---|---|
+| **Biometría / credencial del dispositivo** (ingreso) | `USE_BIOMETRIC` (normal) | Se consulta `BiometricManager.canAuthenticate`; si no hay bloqueo configurado, se informa y se permite ingresar |
+| **Notificaciones locales** (al registrar una evaluación) | `POST_NOTIFICATIONS` (en tiempo de ejecución, Android 13+) | Diálogo explicativo → diálogo del sistema; si se rechaza, la app sigue funcionando y Perfil ofrece abrir Ajustes |
+| **Selector de documentos + PdfRenderer** (CV) | Ninguno (Storage Access Framework) | Solo se accede al PDF elegido; se persiste el permiso de lectura del URI |
+| **Intents** (abrir perfil, abrir PDF con otra app, compartir) | Ninguno | Se controla `ActivityNotFoundException` |
 
----
+La pantalla **Perfil** muestra el estado real de cada permiso y permite probar cada recurso (útil para la defensa).
 
-## ✨ Características Principales
-
-### 🔐 1. Gestión de Sesión y Autenticación por Roles
-- Soporte para dos roles principales: **Evaluadora** y **Dirección**.
-- Adapta el flujo de navegación según el rol del usuario (las evaluadoras van a la lista de candidatas; la dirección al ranking consolidado).
-- Trazabilidad automática de eventos de inicio y cierre de sesión.
-
-### 📝 2. Registro de Candidatas con Validación Estricta
-- Formulario interactivo con feedback inmediato:
-  - **Nombre completo**: Mínimo 3 caracteres.
-  - **Correo electrónico**: Formato válido restringido a dominios autorizados (`@ejemplo.cl`, `@example.com`, `@test.cl`).
-  - **Teléfono chileno**: Formato estandarizado (`+56 9 XXXX XXXX`).
-  - **Área de especialización**: Ciberseguridad, Desarrollo de Software, Infraestructura TI, Ciencia de Datos, etc.
-  - **Experiencia**: Rango entre 0 y 50 años.
-  - **Resumen profesional**: Entre 30 y 500 caracteres.
-  - **Enlaces externos**: Validación de perfil de LinkedIn y nombre/ruta del CV adjunto.
-
-### 🔍 3. Búsqueda Dinámica y Badges de Estado
-- Lista filtrable en tiempo real por nombre de la candidata o área de especialidad.
-- Indicadores visuales de estado mediante badges de colores (`EstadoBadge`):
-  - 🟣 **Postulada**
-  - 🟡 **En Evaluación**
-  - ⚪ **Evaluada**
-  - 🟢 **Seleccionada**
-  - 🔴 **No Seleccionada**
-
-### 📊 4. Matriz de Evaluación Ponderada
-Evaluación basada en 5 criterios clave precargados como datos semilla en la base de datos:
-
-| # | Criterio | Peso (%) |
-|---|---|:---:|
-| 1 | **Experiencia Técnica y Trayectoria** | 25% |
-| 2 | **Conocimientos en Ciberseguridad / TI** | 20% |
-| 3 | **Habilidades Blandas y Liderazgo** | 20% |
-| 4 | **Potencial de Crecimiento e Impacto** | 20% |
-| 5 | **Calidad de la Postulación y CV** | 15% |
-
-- **Escala de 1 a 5**: Calificación cuantitativa rápida por radio buttons.
-- **Justificación obligatoria**: Exigida automáticamente si la nota es baja (1 o 2 puntos).
-- **Observación general**: Comentario obligatorio de cierre (20 a 400 caracteres).
-- **Actualización de estado automática**: Al registrar la primera evaluación, la candidata cambia automáticamente su estado a *En Evaluación*.
-
-### 🥇 5. Ranking Consolidado y Categorización
-- Vista exclusiva para el equipo directivo.
-- Cálculo de notas en una escala de 0 a 100 puntos utilizando promedios ponderados.
-- Categorización automática del resultado:
-  - 🌟 **Sobresaliente**: $\ge 85.0$ pts
-  - 💪 **Sólida**: $\ge 70.0$ pts
-  - 📈 **En Desarrollo**: $\ge 50.0$ pts
-  - ⚠️ **Insuficiente**: $< 50.0$ pts
-
----
-
-## 🛠️ Arquitectura y Tecnologías
-
-El proyecto sigue una arquitectura limpia basada en **MVVM (Model-View-ViewModel)** y **Repository Pattern**, recomendada oficialmente por Android.
+## Arquitectura
 
 ```
-com.example.desarrollo_mobile
-├── data
-│   ├── local
-│   │   ├── dao           # CandidataDao, CriterioDao, EvaluacionDao, HistorialDao
-│   │   ├── Converters.kt # TypeConverters para enums en Room
-│   │   ├── DatosSemilla.kt
-│   │   └── WimDatabase.kt
-│   └── repository
-│       └── WimRepository.kt
-├── di
-│   ├── AppContainer.kt   # Inyección de dependencias manual (Container Pattern)
-│   └── WimApplication.kt
-├── model                 # Entidades de Room y Modelos de Dominio
-├── navigation            # NavGraph y definición de Screens
-├── ui
-│   ├── components        # Componentes reutilizables (EstadoBadge, etc.)
-│   ├── screens           # Pantallas Composable (Login, Lista, Registro, Evaluar, Ranking)
-│   ├── theme             # Colores, Tipografía y Tema Material 3
-│   └── viewmodel         # CandidatasViewModel, EvaluacionViewModel, SesionViewModel
-└── validation            # Validadores puros (CandidataValidator, EvaluacionValidator)
+com.example.appsemestral
+├── model/              Entidades Room, enums y reglas de negocio puras (CalculadoraPuntaje)
+├── data/
+│   ├── local/          WimDatabase, Converters, DAOs (dao/), DatosSemilla (datos sintéticos)
+│   └── repository/     CandidataRepository, EvaluacionRepository (transacción + anti-duplicados), HistorialRepository
+├── validation/         Validadores en Kotlin puro (testeables sin emulador)
+├── navigation/         Rutas y NavHost con transiciones animadas
+├── nativo/             Biometría, notificaciones, archivos/PDF, intents, UI de permisos
+├── di/                 AppContainer (inyección de dependencias manual)
+└── ui/
+    ├── viewmodel/      Estado con StateFlow + AppViewModelProvider (fábrica)
+    ├── screens/        Pantallas (Composables)
+    ├── components/     Componentes reutilizables (CampoValidado, PuntajeCircular…)
+    └── theme/          Material Design 3 (colores, tipografía, tema claro/oscuro)
 ```
 
-### Stack Tecnológico
+Flujo de datos: **Screen** (observa `StateFlow` con `collectAsStateWithLifecycle`) → llama funciones del
+**ViewModel** → el ViewModel valida y llama al **Repository** → el Repository usa los **DAO** de Room →
+Room emite un nuevo `Flow` → la UI se recompone sola.
 
-- **Lenguaje**: Kotlin 2.0.0
-- **UI**: Jetpack Compose + Material Design 3
-- **Navegación**: Navigation Compose 2.7.7
-- **Base de Datos Local**: Room 2.6.1 (SQLite) con Coroutines y Flow
-- **Concurrencia**: Kotlin Coroutines (`Dispatchers.IO`) & StateFlow / Reactive Flow
-- **Patrón DI**: Manual Dependency Injection mediante `AppContainer` e integración en `Application`
-- **Gestor de Dependencias**: Gradle Version Catalog (`libs.versions.toml`)
+## Cómo ejecutar
 
----
+1. Android Studio reciente (compatible con AGP 9.2) con JDK 21 (el que trae Android Studio).
+2. `File > Open` y elegir la carpeta del proyecto. Esperar la sincronización de Gradle
+   (AGP 9.2.1, Kotlin 2.2.10, KSP 2.2.10-2.0.2, Room 2.8.4, Gradle 9.4.1).
+3. Ejecutar en un emulador con **API 24+** (recomendado API 34 o superior con Google Play).
+4. Para probar la biometría en el emulador: Ajustes → Seguridad → configurar un PIN y una huella
+   (en el panel *Extended controls → Fingerprint* se simula el toque).
+5. Tests unitarios de validación: `./gradlew test`.
 
-## 🚀 Instalación y Ejecución
+### Datos de prueba precargados
 
-### Requisitos Previos
+- 6 candidatas sintéticas con CV de prueba en PDF generado por la app.
+- Evaluaciones de **“Evaluadora Demo Uno”** y **“Evaluadora Demo Dos”**.
+  Ingresa como *Evaluadora Demo Uno* y abre a *Ignacia Valdés Soto* para ver el bloqueo de duplicados.
+- Ingresa como **Dirección** para resolver candidaturas con estado *Evaluada*.
 
-- **Android Studio**: Ladybug (2024.2.1) o superior.
-- **JDK**: Java 11 o superior (configurado en las opciones del proyecto).
-- **Android SDK**: `minSdk 24` (Android 7.0) / `targetSdk 34` / `compileSdk 35`.
+## Guion sugerido para la demo
 
-### Pasos para Ejecutar
+1. Ingresar como Evaluadora (biometría) → aceptar notificaciones.
+2. Registrar una candidata con datos inválidos (ver íconos y mensajes) y luego válidos (adjuntar PDF).
+3. Abrir la candidata → ver CV y perfil → evaluar (puntaje ≤ 2 exige justificación) → notificación.
+4. Intentar evaluar de nuevo → bloqueo de duplicado (queda en el historial).
+5. Cerrar sesión, entrar como Dirección → Resultados → resolver → compartir ranking.
+6. Cerrar y reabrir la app: los datos siguen ahí (Room).
 
-1. **Clonar el repositorio**:
-   ```bash
-   git clone https://github.com/tu-usuario/desarrollo_mobile.git
-   cd desarrollo_mobile
-   ```
+## Autenticación con el backend (JWT)
 
-2. **Abrir en Android Studio**:
-   Abre la carpeta del proyecto y espera a que Gradle sincronice las dependencias.
+La app inicia sesión contra el backend `wim100-backend` (Spring Security + JWT, repositorio aparte):
 
-3. **Compilar desde la terminal (opcional)**:
-   ```bash
-   ./gradlew :app:assembleDebug
-   ```
+1. `POST /api/auth/login` con `{ "username", "password" }` → el backend responde `{ token, tipo, expiraEn, usuario }`.
+2. El token se guarda en memoria (`data/remote/SesionToken.kt`); al cerrar la app hay que volver a ingresar.
+3. `data/remote/AuthInterceptor.kt` agrega `Authorization: Bearer <token>` a todas las llamadas al backend
+   (nunca al login ni a la API externa randomuser.me).
+4. Si el backend responde **401** a una llamada con token (expiró, cuenta desactivada), se borra el token,
+   se cierra la sesión y la app vuelve al login con el aviso "Tu sesión expiró".
+5. Al cerrar sesión se llama a `POST /api/auth/logout` (auditoría en el servidor) y se descarta el token.
 
-4. **Ejecutar la Aplicación**:
-   Selecciona un emulador o dispositivo físico con Android 7.0 (API 24) o superior y presiona **Run (`Shift + F10`)**.
-
----
-
-## 📝 Reglas de Negocio Destacadas
-
-1. **Datos Semilla**: Al crear la base de datos por primera vez, un callback de Room (`DatabaseCallback`) inserta automáticamente los 5 criterios ponderados iniciales.
-2. **Consistencia Transaccional**: Las evaluaciones y sus desglose de notas se guardan de forma atómica en tablas relacionadas (`evaluaciones` y `puntajes_criterio`).
-3. **Auditoría Completa**: Cualquier intento fallido de registro (ej. correo repetido) o evaluación duplicada genera una entrada en la tabla `historial` con rol, usuario y detalle de la falta.
-
----
-
-## 🤝 Contribución
-
-¡Las contribuciones son bienvenidas! Si deseas proponer una mejora o corregir un problema:
-
-1. Haz un **Fork** del proyecto.
-2. Crea una rama para tu característica (`git checkout -b feature/nueva-caracteristica`).
-3. Realiza tus cambios y confirma con commits descriptivos (`git commit -m 'Añade nueva característica'`).
-4. Sube los cambios a tu rama (`git push origin feature/nueva-caracteristica`).
-5. Abre un **Pull Request**.
-
----
-
-## 📄 Licencia
-
-Este proyecto está distribuido bajo la licencia MIT. Consulta el archivo `LICENSE` para obtener más información.
+Usuarias de prueba del backend: `andrea_torres`, `maria_fernandez` (Evaluadora) y `direccion` (Dirección),
+con la contraseña definida en `SEED_DEFAULT_PASSWORD` (por defecto `Wim100.2026`).
