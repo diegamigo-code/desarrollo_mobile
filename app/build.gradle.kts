@@ -7,6 +7,8 @@ plugins {
 
 val wimApiUrl = providers.gradleProperty("wimApiUrl").orElse("http://10.0.2.2:8080/api")
 val wimLocalDemo = providers.gradleProperty("wimLocalDemo").orElse("false")
+val wimConfigUrl = providers.gradleProperty("wimConfigUrl")
+    .orElse("https://diegamigo-code.github.io/desarrollo_mobile/config.json")
 
 android {
     namespace = "com.example.desarrollo_mobile"
@@ -17,6 +19,7 @@ android {
         minSdk = 24
         targetSdk = 34
         buildConfigField("String", "WIM_API_URL", "\"${wimApiUrl.get().trimEnd('/')}\"")
+        buildConfigField("String", "WIM_CONFIG_URL", "\"${wimConfigUrl.get()}\"")
         buildConfigField("boolean", "WIM_LOCAL_DEMO", wimLocalDemo.get().toBooleanStrict().toString())
         versionCode = 1
         versionName = "1.0"

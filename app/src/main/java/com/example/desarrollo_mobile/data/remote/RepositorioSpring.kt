@@ -32,6 +32,7 @@ class SesionCaducada : IllegalStateException("Tu sesión terminó. Vuelve a inic
 
 class RepositorioSpring(
     private val baseUrl: String,
+    private val servidor: ServidorApi? = null,
     private val abrirConexion: (URL) -> HttpURLConnection = { it.openConnection() as HttpURLConnection }
 ) : RepositorioApp {
     private val gson = Gson()
@@ -45,8 +46,24 @@ class RepositorioSpring(
     override fun obtenerCandidataPorId(id: Long) = candidatas.map { lista -> lista.find { it.id == id } }
     override fun obtenerHistorialCandidata(candidataId: Long) = panel.map { p -> p.historial.filter { it.candidataId == candidataId } }
 
-    private suspend fun solicitar(ruta: String, metodo: String = "GET", datos: Any? = null): String = withContext(Dispatchers.IO) {
-        val conexion = abrirConexion(URL("$baseUrl/$ruta"))
+    // Si falla la red y la URL publicada cambió (túnel nuevo), se reintenta una vez con la nueva dirección.
+    private suspend fun solicitar(ruta: String, metodo: String = "GET", datos: Any? = null): String {
+        val base = servidor?.url() ?: baseUrl
+        return try {
+            intentar(base, ruta, metodo, datos)
+        } catch (e: IOException) {
+            val nueva = servidor?.actualizar()
+            if (nueva == null || nueva == base) throw IllegalStateException("No se pudo comunicar con la API de WIM 100", e)
+            try {
+                intentar(nueva, ruta, metodo, datos)
+            } catch (e2: IOException) {
+                throw IllegalStateException("No se pudo comunicar con la API de WIM 100", e2)
+            }
+        }
+    }
+
+    private suspend fun intentar(base: String, ruta: String, metodo: String, datos: Any?): String = withContext(Dispatchers.IO) {
+        val conexion = abrirConexion(URL("$base/$ruta"))
         try {
             conexion.requestMethod = metodo
             conexion.instanceFollowRedirects = false
@@ -75,8 +92,6 @@ class RepositorioSpring(
                 }
             }
             conexion.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-        } catch (e: IOException) {
-            throw IllegalStateException("No se pudo comunicar con la API de WIM 100", e)
         } finally {
             conexion.disconnect()
         }

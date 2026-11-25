@@ -20,6 +20,8 @@ cp -n .env.example .env
 docker compose up --build -d
 ```
 
+Para usar la app desde cualquier teléfono, ejecuta `publicar_backend.bat` en el backend: abre un túnel de Cloudflare y, con GitHub CLI, publica la URL en `https://diegamigo-code.github.io/desarrollo_mobile/config.json` mediante el workflow `publicar-api.yml` de este repositorio. La app lee ese archivo al iniciar (`ServidorApi`) y vuelve a leerlo si pierde la conexión, así que no hay que reinstalarla cuando cambia el túnel. Si no puede leerlo, usa la URL compilada.
+
 El emulador accede a la API en `http://10.0.2.2:8080/api`. Para usar los registros anteriores de Room en el mismo dispositivo, compila con `-PwimLocalDemo=true`. Las dos modalidades conservan sus datos por separado. Las instalaciones anteriores mantienen su base local y la API empieza con datos de demostración propios.
 
 ---

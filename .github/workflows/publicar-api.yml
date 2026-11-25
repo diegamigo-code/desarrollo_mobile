@@ -1,0 +1,42 @@
+name: Publicar URL de la API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - name: Generar config.json
+        env:
+          WIM_API_URL: ${{ vars.WIM_API_URL }}
+        run: |
+          if [ -z "$WIM_API_URL" ]; then
+            echo "Falta la variable WIM_API_URL del repositorio" >&2
+            exit 1
+          fi
+          mkdir -p sitio
+          jq -n --arg url "$WIM_API_URL" --arg fecha "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{apiUrl: $url, actualizado: $fecha}' > sitio/config.json
+          cat sitio/config.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: sitio
+
+      - id: despliegue
+        uses: actions/deploy-pages@v4
