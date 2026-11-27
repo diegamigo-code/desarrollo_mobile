@@ -30,6 +30,10 @@ private data class ErrorApi(val mensaje: String?, val errores: Map<String, Strin
 
 class SesionCaducada : IllegalStateException("Tu sesión terminó. Vuelve a iniciar sesión.")
 
+// 502, 503, 504 y 530 los responde Cloudflare cuando el túnel ya no existe o no llega al backend.
+private class TunelNoDisponible(status: Int) : IOException("El túnel respondió HTTP $status")
+private val ESTADOS_TUNEL = setOf(502, 503, 504, 530)
+
 class RepositorioSpring(
     private val baseUrl: String,
     private val servidor: ServidorApi? = null,
@@ -76,6 +80,7 @@ class RepositorioSpring(
                 conexion.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(gson.toJson(datos)) }
             }
             val status = conexion.responseCode
+            if (status in ESTADOS_TUNEL) throw TunelNoDisponible(status)
             if (status == HttpURLConnection.HTTP_UNAUTHORIZED && ruta != "auth/login") {
                 cookie = null
                 panel.value = Panel()
